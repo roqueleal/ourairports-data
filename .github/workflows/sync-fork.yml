@@ -3,7 +3,7 @@ name: Sync Fork
 on:
   schedule:
     - cron: '0 0 * * *'  # Se ejecuta todos los días a la medianoche (UTC)
-  workflow_dispatch:  # Permite ejecutarlo manualmente
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub Actions
 
 jobs:
   sync:
@@ -13,20 +13,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+          fetch-depth: 0  # Descarga todo el historial para evitar problemas con rebase
+
       - name: Configurar Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Agregar repositorio original como remoto
+      - name: Agregar el repositorio original como remoto
         run: git remote add upstream https://github.com/davidmegginson/ourairports-data.git
 
       - name: Obtener cambios del original
         run: git fetch upstream
 
-      - name: Fusionar cambios en la rama principal
+      - name: Sincronizar con el repositorio original
         run: |
-          git checkout main  # Usa "master" si es necesario
+          git checkout main  # Asegúrate de que la rama principal sea "main"
+          git pull --rebase origin main  # Evita conflictos con el fork
           git merge upstream/main --allow-unrelated-histories || true
           git push origin main
