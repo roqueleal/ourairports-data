@@ -28,7 +28,7 @@ jobs:
 
       - name: Sincronizar con el repositorio original
         run: |
-          git checkout main  # Asegúrate de que la rama principal sea "main"
-          git pull --rebase origin main  # Evita conflictos con el fork
+          git checkout main  # Cambia a la rama principal
+          git pull --rebase origin main || git rebase --abort  # Evita conflictos
           git merge upstream/main --allow-unrelated-histories || true
-          git push origin main
+          git push origin main || git push --force origin main  # Si falla, forzar push
